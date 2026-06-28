@@ -3,6 +3,7 @@ using Microsoft.Office.Core;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using System.Diagnostics;
+using System.Windows.Forms;
 using Outlook = Microsoft.Office.Interop.Outlook;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using Word = Microsoft.Office.Interop.Word;
@@ -13,7 +14,6 @@ namespace HoneyPhoto
     {
         private Bitmap? _originalImage;
         private Bitmap? _previewImage;
-        private string? _selectedOutputFormat;
         private string? _filePath;
         private bool _isModified = false;
 
@@ -40,7 +40,7 @@ namespace HoneyPhoto
         {
             using OpenFileDialog dialog = new OpenFileDialog();
 
-            dialog.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff";
+            dialog.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif;*.ico;*.tiff";
 
             if (dialog.ShowDialog() != DialogResult.OK)
                 return;
@@ -70,7 +70,12 @@ namespace HoneyPhoto
             if (extension == "JPE")
                 extension = "JPEG";
 
-            cmbFileType.SelectedItem = extension;
+            int index = cmbFileType.FindStringExact(extension);
+
+            if (index >= 0)
+                cmbFileType.SelectedIndex = index;
+            else
+                cmbFileType.Text = extension;
 
             lblFileName.Visible = true;
             lblFileName.Text = $"⎢ {Path.GetFileName(path)}";
@@ -125,6 +130,9 @@ namespace HoneyPhoto
 
             string extension = Path.GetExtension(_filePath!).TrimStart('.').ToUpper();
 
+            if (extension == "JPE")
+                extension = "JPEG";
+
             int index = cmbFileType.FindStringExact(extension);
 
             if (index >= 0)
@@ -147,6 +155,9 @@ namespace HoneyPhoto
 
             using (Graphics g = Graphics.FromImage(resized))
             {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
                 g.DrawImage(_originalImage, 0, 0, width, height);
             }
 
@@ -167,15 +178,16 @@ namespace HoneyPhoto
         private void MainForm_Load(object sender, EventArgs e)
         {
             cmbFileType.Items.AddRange(new object[]
-                {
-                    "BMP",
-                    "GIF",
-                    "ICO",
-                    "JPEG",
-                    "JPG",
-                    "PNG",
-                    "TIFF"
-                });
+            {
+                "BMP",
+                "GIF",
+                "ICO",
+                "JFIF",
+                "JPEG",
+                "JPG",
+                "PNG",
+                "TIFF"
+            });
 
             #region
             label6.Visible = false;
@@ -275,8 +287,6 @@ namespace HoneyPhoto
             if (cmbFileType.SelectedItem == null)
                 return;
 
-            _selectedOutputFormat = cmbFileType.SelectedItem.ToString();
-
             _isModified = true;
 
             UpdateStatusBar();
@@ -365,8 +375,9 @@ namespace HoneyPhoto
                     _previewImage!.Save(path, System.Drawing.Imaging.ImageFormat.Png);
                     break;
 
-                case "jpg":
+                case "jfif":
                 case "jpeg":
+                case "jpg":
                     _previewImage!.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
                     break;
 
@@ -498,15 +509,12 @@ namespace HoneyPhoto
 
             Word.Document document = app.Documents.Add();
 
+            document.Content.Text = "Honey Photo\n\n";
+
             Word.InlineShape picture = document.InlineShapes.AddPicture(tempImage);
 
             picture.LockAspectRatio = MsoTriState.msoTrue;
-
             picture.Width = 450;
-
-            document.Content.Text = "Honey Photo\n\n";
-
-            document.InlineShapes.AddPicture(tempImage);
         }
 
         private void btnOutlook_Click(object sender, EventArgs e)
@@ -525,7 +533,7 @@ namespace HoneyPhoto
 
             mail.Subject = "Image from Honey Photo";
 
-            mail.Body = "This image was exported from Honey Photo.";
+            mail.HTMLBody = "This image was exported from Honey Photo.";
 
             mail.Attachments.Add(tempImage);
 
@@ -623,7 +631,7 @@ namespace HoneyPhoto
                 Path.GetTempPath(),
                 $"Honey Photo_{Guid.NewGuid()}.{extension}");
 
-            _previewImage.Save(tempImage, System.Drawing.Imaging.ImageFormat.Png);
+            SaveImage(tempImage, extension);
 
             Process.Start(new ProcessStartInfo
             {
@@ -644,7 +652,7 @@ namespace HoneyPhoto
                 Path.GetTempPath(),
                 $"Honey Photo_{Guid.NewGuid()}.{extension}");
 
-            _previewImage.Save(tempImage, System.Drawing.Imaging.ImageFormat.Png);
+            SaveImage(tempImage, extension);
 
             Process.Start(new ProcessStartInfo
             {
