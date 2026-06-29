@@ -96,7 +96,17 @@ namespace HoneyPhoto
 
             lblSize.Text = $"{_previewImage.Width} x {_previewImage.Height}";
 
-            lblFileSize.Text = FormatFileSize(file.Length);
+            if (!_isModified)
+            {
+                lblFileSize.Text = FormatFileSize(file.Length);
+                lblFileSize.ForeColor = Color.FromArgb(34, 34, 34);
+            }
+            else
+            {
+                lblFileSize.Text = "Not Saved";
+                lblFileSize.ForeColor = Color.FromArgb(64, 64, 64);
+            }
+
         }
 
         private string FormatFileSize(long bytes)
@@ -648,15 +658,19 @@ namespace HoneyPhoto
 
             string extension = cmbFileType.SelectedItem!.ToString()!.ToLower();
 
-            string tempImage = Path.Combine(
-                Path.GetTempPath(),
+            string downloadsPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "Downloads");
+
+            string filePath = Path.Combine(
+                downloadsPath,
                 $"Honey Photo_{Guid.NewGuid()}.{extension}");
 
-            SaveImage(tempImage, extension);
+            SaveImage(filePath, extension);
 
             Process.Start(new ProcessStartInfo
             {
-                FileName = tempImage,
+                FileName = filePath,
                 UseShellExecute = true
             });
         }

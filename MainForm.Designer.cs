@@ -80,6 +80,7 @@
             lblSize = new Label();
             panel13 = new Panel();
             pnlExportTo = new Panel();
+            panel16 = new Panel();
             btnOutlook = new Button();
             btnWord = new Button();
             btnFileExplorer = new Button();
@@ -642,6 +643,7 @@
             // 
             pnlExportTo.BackColor = SystemColors.ControlLight;
             pnlExportTo.BorderStyle = BorderStyle.FixedSingle;
+            pnlExportTo.Controls.Add(panel16);
             pnlExportTo.Controls.Add(btnOutlook);
             pnlExportTo.Controls.Add(btnWord);
             pnlExportTo.Controls.Add(btnFileExplorer);
@@ -652,9 +654,17 @@
             pnlExportTo.Controls.Add(btnPowerPoint);
             pnlExportTo.Location = new Point(867, 95);
             pnlExportTo.Name = "pnlExportTo";
-            pnlExportTo.Size = new Size(122, 241);
+            pnlExportTo.Size = new Size(122, 245);
             pnlExportTo.TabIndex = 2;
             pnlExportTo.Visible = false;
+            // 
+            // panel16
+            // 
+            panel16.BackColor = Color.Gray;
+            panel16.Location = new Point(0, 210);
+            panel16.Name = "panel16";
+            panel16.Size = new Size(122, 1);
+            panel16.TabIndex = 1;
             // 
             // btnOutlook
             // 
@@ -693,7 +703,7 @@
             btnFileExplorer.Font = new Font("Segoe UI Semibold", 7.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnFileExplorer.Image = Properties.Resources.file_explorer;
             btnFileExplorer.ImageAlign = ContentAlignment.MiddleLeft;
-            btnFileExplorer.Location = new Point(0, 210);
+            btnFileExplorer.Location = new Point(0, 211);
             btnFileExplorer.Name = "btnFileExplorer";
             btnFileExplorer.Size = new Size(122, 30);
             btnFileExplorer.TabIndex = 0;
@@ -879,5 +889,6 @@
         private ToolStripMenuItem closeToolStripMenuItem;
         private Panel panel1;
         private Button btnInfo;
+        private Panel panel16;
     }
 }
